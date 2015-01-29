@@ -46,23 +46,27 @@ namespace BlockSolve
                     //Console.WriteLine("A Key " + a_kvp.Key + " B Key " + b_kvp.Key + " Index " + b_kvp.Value.index);
                     //Console.WriteLine("Loop B A key " + a_kvp.Key + " B key " + b_kvp.Key + " skip " + skip);
 
-                    //var num_elements = 50000;
-                    //var tempList = new List<uint>(num_elements);
-                    //foreach (var item in a_kvp.Value.input_chemicals)
-                    //{
-                    //    tempList.Add(item);
-                    //}
-                    //var a_v = tempList.ToHashSet();
-                    //tempList.Clear();
+                    var num_elements = 500;
+                    var tempList = new List<uint>(num_elements);
+                    foreach (var item in a_kvp.Value.input_chemicals)
+                    {
+                        tempList.Add(item);
+                    }
+                    var a_v = tempList.ToHashSet();
+                    tempList.Clear();
 
-                    HashSet<uint> a_v = new HashSet<uint>(a_kvp.Value.input_chemicals);
+                    //HashSet<uint> a_v = new HashSet<uint>(a_kvp.Value.input_chemicals);
 
                     a_v.IntersectWith(b_kvp.Value.input_chemicals);                   
 
                     if (a_v.Count > 1)
                     {
                         // Made a block 
-                        string key = string.Join(" ",a_v);
+                     
+                        StringBuilder key_b = new StringBuilder();
+                        key_b.Append(a_v);
+                        string key = key_b.ToString();
+
                         if (all_sets.ContainsKey(key))
                         {
                             Set_info old_set_info = new Set_info();
