@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,7 +25,7 @@ namespace BlockSolve
     class Program 
     {
         static Dictionary<uint, Input_info> main_map = new Dictionary<uint, Input_info>();
-        static ConcurrentDictionary<int, Set_info> all_sets = new ConcurrentDictionary<int, Set_info>();
+        static ConcurrentDictionary<String, Set_info> all_sets = new ConcurrentDictionary<String, Set_info>();
 
         static void Main(string[] args)
         {
@@ -46,22 +46,23 @@ namespace BlockSolve
                     //Console.WriteLine("A Key " + a_kvp.Key + " B Key " + b_kvp.Key + " Index " + b_kvp.Value.index);
                     //Console.WriteLine("Loop B A key " + a_kvp.Key + " B key " + b_kvp.Key + " skip " + skip);
 
-                    var num_elements = 50000;
-                    var tempList = new List<uint>(num_elements);
-                    foreach (var item in a_kvp.Value.input_chemicals)
-                    {
-                        tempList.Add(item);
-                    }
-                    var a_v = tempList.ToHashSet();
-                    tempList.Clear();
+                    //var num_elements = 50000;
+                    //var tempList = new List<uint>(num_elements);
+                    //foreach (var item in a_kvp.Value.input_chemicals)
+                    //{
+                    //    tempList.Add(item);
+                    //}
+                    //var a_v = tempList.ToHashSet();
+                    //tempList.Clear();
 
+                    HashSet<uint> a_v = new HashSet<uint>(a_kvp.Value.input_chemicals);
 
                     a_v.IntersectWith(b_kvp.Value.input_chemicals);                   
 
                     if (a_v.Count > 1)
                     {
                         // Made a block 
-                        int key = a_v.GetHashCode();
+                        string key = string.Join(" ",a_v);
                         if (all_sets.ContainsKey(key))
                         {
                             Set_info old_set_info = new Set_info();
@@ -94,7 +95,7 @@ namespace BlockSolve
             {
                 int a_len = a_kvp.Value.chemical_set.Count;
 
-                foreach (KeyValuePair<int, Set_info> b_kvp in all_sets)
+                foreach (KeyValuePair<String, Set_info> b_kvp in all_sets)
                 {
                     // The A chem set should be less in length than the B chem set for the possibility of a subset
                     if (a_len < b_kvp.Value.chemical_set.Count && a_kvp.Value.chemical_set.IsSubsetOf(b_kvp.Value.chemical_set))
