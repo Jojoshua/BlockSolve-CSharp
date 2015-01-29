@@ -64,8 +64,11 @@ namespace BlockSolve
                         // Made a block 
                      
                         StringBuilder key_b = new StringBuilder();
-                        key_b.Append(a_v);
-                        string key = key_b.ToString();
+                        foreach (var item in a_v)
+                        {
+                            key_b.Append(item);
+                        }                       
+                        string key = key_b.ToString();                    
 
                         if (all_sets.ContainsKey(key))
                         {
