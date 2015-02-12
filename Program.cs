@@ -37,9 +37,24 @@ namespace BlockSolve
     {
         static Dictionary<uint, Input_info> main_map = new Dictionary<uint, Input_info>();
         static ConcurrentDictionary<String, Set_info> all_sets = new ConcurrentDictionary<String, Set_info>();
+        static int start_at = 0;
+        static int stop_at = 0;
 
         static void Main(string[] args)
         {
+            //If passing in parameters to run chunks at a time
+            //0-5
+            //6-10
+            //11 0  (get the rest)
+            if (args.Length > 0)
+            {
+                start_at = int.Parse(args[0]); //Inclusive
+            }
+            if (args.Length > 1)
+            {
+                stop_at = int.Parse(args[1]); //Inclusive
+            }            
+
             //sort_file();
             //return;
 
@@ -53,6 +68,13 @@ namespace BlockSolve
             //{
             Parallel.ForEach(main_map, a_kvp =>
             {
+                //If the index reached at is greater than the index to stop at, skip it
+                //if (stop_at > 0 && a_kvp.Value.index > stop_at)
+                //{
+                //    //Console.WriteLine("skipping " + a_kvp.Value.index);
+                //    return;
+                //}
+
                 //Console.WriteLine("A Key " + a_kvp.Key +  " Index " + a_kvp.Value.index);
                 //skip += 1;
                 //Console.WriteLine("Loop A key " + a_kvp.Key + " skip " + skip);
@@ -155,20 +177,54 @@ namespace BlockSolve
            // }
 
 
-            int block_size = 0;
-            foreach (var item in all_sets.OrderBy(x => x.Value.chemical_set.Count * x.Value.protein_set.Count))
+
+            //int block_size = 0;
+            //foreach (var item in all_sets.OrderBy(x => x.Value.chemical_set.Count * x.Value.protein_set.Count))
+            //{
+            //    //Weird occurence where there are "0" items as proteins
+            //    item.Value.protein_set.RemoveWhere(x => x < 1);
+
+            //    if (block_size != item.Value.protein_set.Count * item.Value.chemical_set.Count)
+            //    {
+            //        //Console.WriteLine("\n Block Size " + item.Value.protein_set.Count * item.Value.chemical_set.Count);
+            //        block_size = item.Value.protein_set.Count * item.Value.chemical_set.Count;
+            //    }
+
+
+            //    Console.WriteLine("C[" + string.Join(" ", item.Value.chemical_set.OrderBy(x => x)) + "] P[" + string.Join(" ", item.Value.protein_set.OrderBy(x => x)) + "]");
+            //}
+
+            writeBlocks();
+        }
+
+        static void writeBlocks()
+        {
+            System.IO.Directory.CreateDirectory("output");
+            string pathString = "output\\" + start_at + "-" + stop_at + ".txt";
+
+            if (!System.IO.File.Exists(pathString))
             {
-                //Weird occurence where there are "0" items as proteins
-                item.Value.protein_set.RemoveWhere(x => x < 1);
-
-                if (block_size != item.Value.protein_set.Count * item.Value.chemical_set.Count)
-                {
-                    //Console.WriteLine("\n Block Size " + item.Value.protein_set.Count * item.Value.chemical_set.Count);
-                    block_size = item.Value.protein_set.Count * item.Value.chemical_set.Count;
+                using (System.IO.FileStream fs = System.IO.File.Create(pathString))
+                {                                     
                 }
+            }
 
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(pathString, true))
+            {
+                int block_size = 0;
+                foreach (var item in all_sets.OrderBy(x => x.Value.chemical_set.Count * x.Value.protein_set.Count))
+                {
+                    //Weird occurence where there are "0" items as proteins
+                    item.Value.protein_set.RemoveWhere(x => x < 1);
 
-                Console.WriteLine("C[" + string.Join(" ", item.Value.chemical_set.OrderBy(x => x)) + "] P[" + string.Join(" ", item.Value.protein_set.OrderBy(x => x)) + "]");
+                    if (block_size != item.Value.protein_set.Count * item.Value.chemical_set.Count)
+                    {
+                        //Console.WriteLine("\n Block Size " + item.Value.protein_set.Count * item.Value.chemical_set.Count);
+                        block_size = item.Value.protein_set.Count * item.Value.chemical_set.Count;
+                    }
+
+                    file.WriteLine("C[" + string.Join(" ", item.Value.chemical_set.OrderBy(x => x)) + "] P[" + string.Join(" ", item.Value.protein_set.OrderBy(x => x)) + "]");
+                }
             }
 
         }
@@ -180,6 +236,14 @@ namespace BlockSolve
             uint index = 0;
             foreach (string line in lines)
             {
+                index++;
+                // Get everything in the case of 0-X but in other cases only start appending when reaching that line
+                if (index < start_at)                    
+                {
+                    //Console.WriteLine("Skipping input index " + index);
+                    continue;
+                }
+
                 //Console.WriteLine("\t" + line);
                 string[] split = line.Split(',');
 
@@ -194,7 +258,7 @@ namespace BlockSolve
 
                 Input_info input_info = new Input_info();
                 input_info.input_chemicals = c_set;
-                input_info.index = index++;
+                input_info.index = index;
 
                 main_map.Add(protein, input_info);
             }
@@ -216,9 +280,6 @@ namespace BlockSolve
             }
 
         }
-
-
-
 
 
     }
